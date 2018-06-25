@@ -83,7 +83,7 @@ export default class VNode {
           // create a new DOM node starting from the children[i] subtree
           const rowNode = this.buildForRow(childs[i], itemName, index, doc, requireList);
           // parse the rowNode and build the new scope based on it
-          this.parser.buildScope(rowNode, scope, false);
+          this.parser.buildScope(rowNode, scope, false, -1);
           // append the rowNode to the fragment
           frag.appendChild(rowNode);
         }

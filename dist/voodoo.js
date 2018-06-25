@@ -1,6 +1,6 @@
-/** A lightweight SPA framework inspired by AngularJS, VueJS and React
+/** An experimental SPA framework inspired by AngularJS, VueJS and React
  * @version: 0.1.0
- * @date: 2018-24-05
+ * @date: 2018-23-06
  * UPDATE AND DOCS AT: https://github.com/Marcotrombino/Voodoo
  * @copyright (C) 2018 Marco Trombino
  * @author: Marco Trombino
@@ -1200,7 +1200,7 @@ var Voodoo = (function (exports,window) {
               // create a new DOM node starting from the children[i] subtree
               var rowNode = _this.buildForRow(childs[i], itemName, index, doc, requireList);
               // parse the rowNode and build the new scope based on it
-              _this.parser.buildScope(rowNode, scope, false);
+              _this.parser.buildScope(rowNode, scope, false, -1);
               // append the rowNode to the fragment
               frag.appendChild(rowNode);
             }
@@ -1666,12 +1666,20 @@ var Voodoo = (function (exports,window) {
         if ($.view) {
           modules.modules["$http"].get(templateUrl).success(function (data) {
             $.view.innerHTML = data;
-            $.parsePage();
+            $.parseNode($.view);
           }).error(function (data) {
             console.error(data, "Cannot find " + templateUrl);
           });
-        } else {
-          $.parsePage();
+        } //else {
+        //$.parsePage();
+        //}
+      }
+    }, {
+      key: "parseApp",
+      value: function parseApp() {
+        var root = this.root;
+        if (root) {
+          this.parseNode(root);
         }
       }
 
@@ -1680,12 +1688,12 @@ var Voodoo = (function (exports,window) {
         */
 
     }, {
-      key: "parsePage",
-      value: function parsePage() {
+      key: "parseNode",
+      value: function parseNode(node) {
         var $ = this;
-        var app = this.root;
-        if (app) {
-          var controllers = app.querySelectorAll(this.queryAttr(DIRECTIVES.ctrl));
+        var rootNode = node;
+        if (rootNode) {
+          var controllers = rootNode.querySelectorAll(this.queryAttr(DIRECTIVES.ctrl));
           controllers.forEach(function (ctrl) {
             var ctrlName = ctrl.getAttribute(DIRECTIVES.ctrl);
             var scope = $.parseController(ctrl);
@@ -1728,16 +1736,21 @@ var Voodoo = (function (exports,window) {
         var scope = new Scope(null);
 
         // find directives and fill the scope traversing the "target" subtree
-        this.buildScope(target, scope, false);
+        this.buildScope(target, scope, false, -1);
         return scope;
       }
     }, {
       key: "buildScope",
-      value: function buildScope(node, scope, hasParentLoop) {
+      value: function buildScope(node, scope, hasParentLoop, childControllers) {
+        //console.log(node, scope, hasParentLoop, childControllers);
+        if (!this.ignorableNode(node) && childControllers <= 0) {
 
-        if (!this.ignorableNode(node)) {
           var tagName = this.getTagName(node);
           var labelsMap = tagName === "TEXT" ? this.getTextLabelsMap(node) : this.getElementLabelsMap(node, scope);
+
+          if (tagName !== "TEXT" && node.hasAttribute(DIRECTIVES.ctrl)) {
+            childControllers++;
+          }
 
           var options = labelsMap.options;
           var labels = labelsMap.labels;
@@ -1766,7 +1779,7 @@ var Voodoo = (function (exports,window) {
 
           for (var _i = 0; _i < childsLen; _i++) {
             if (!this.ignorableNode(childs[_i])) {
-              vnode.addChild(this.buildScope(childs[_i], scope, hasParentLoop));
+              vnode.addChild(this.buildScope(childs[_i], scope, hasParentLoop, childControllers));
             }
           }
 
@@ -2011,6 +2024,7 @@ var Voodoo = (function (exports,window) {
       key: "init",
       value: function init() {
         parser.init(this);
+        parser.parseApp();
         this.router = new Router(this, this.routes, this.defaultRoute);
       }
     }, {

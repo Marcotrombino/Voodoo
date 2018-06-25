@@ -132,25 +132,32 @@ export default class Parser {
     if($.view) {
       modules.modules["$http"].get(templateUrl).success(function (data) {
         $.view.innerHTML = data;
-        $.parsePage();
+        $.parseNode($.view);
       })
       .error(function (data) {
         console.error(data, "Cannot find " + templateUrl);
       });
-    } else {
-      $.parsePage();
-    }
+    } //else {
+      //$.parsePage();
+    //}
 
+  }
+
+  parseApp() {
+    const root = this.root;
+    if(root) {
+      this.parseNode(root);
+    }
   }
 
   /** @method       parsePage
     * @description  Parse whole page starting from root node
     */
-  parsePage() {
+  parseNode(node) {
     const $ = this;
-    const app = this.root;
-    if(app) {
-      const controllers = app.querySelectorAll(this.queryAttr(DIRECTIVES.ctrl));
+    const rootNode = node;
+    if(rootNode) {
+      const controllers = rootNode.querySelectorAll(this.queryAttr(DIRECTIVES.ctrl));
       controllers.forEach(function(ctrl) {
         const ctrlName = ctrl.getAttribute(DIRECTIVES.ctrl);
         const scope = $.parseController(ctrl);
@@ -187,18 +194,23 @@ export default class Parser {
     const scope = new Scope(null);
 
     // find directives and fill the scope traversing the "target" subtree
-    this.buildScope(target, scope, false);
+    this.buildScope(target, scope, false, -1);
 
     if(DEBUG) {console.log(scope); }
     return scope;
   }
 
 
-  buildScope(node, scope, hasParentLoop) {
+  buildScope(node, scope, hasParentLoop, childControllers) {
+    //console.log(node, scope, hasParentLoop, childControllers);
+    if(!this.ignorableNode(node) && childControllers <= 0) {
 
-    if(!this.ignorableNode(node)) {
       const tagName = this.getTagName(node);
       const labelsMap = tagName === "TEXT" ? this.getTextLabelsMap(node) : this.getElementLabelsMap(node, scope);
+
+      if(tagName !== "TEXT" && node.hasAttribute(DIRECTIVES.ctrl)) {
+        childControllers++;
+      }
 
       const options = labelsMap.options;
       const labels = labelsMap.labels;
@@ -227,7 +239,7 @@ export default class Parser {
 
       for(let i = 0; i < childsLen; i++) {
         if(!this.ignorableNode(childs[i])) {
-          vnode.addChild(this.buildScope(childs[i], scope, hasParentLoop));
+          vnode.addChild(this.buildScope(childs[i], scope, hasParentLoop, childControllers));
         }
       }
 

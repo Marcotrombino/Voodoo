@@ -32,6 +32,7 @@ export default class Voodoo {
     */
   init() {
     parser.init(this);
+    parser.parseApp();
     this.router = new Router(this, this.routes, this.defaultRoute);
   }
 
