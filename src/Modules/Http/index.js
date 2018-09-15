@@ -22,7 +22,7 @@ export default class Http {
     return [result, req];
   }
 
-  xhr(type, url, data) {
+  xhr(type, url, token, data) {
     const $ = this;
 
     const methods = {
@@ -37,11 +37,15 @@ export default class Http {
     request.open(type, url, true);
 
     request.setRequestHeader("Content-type", this.config.contentType);
+    if(token) {
+      request.setRequestHeader("Authorization", "BEARER " + token);
+    }
+
     request.onreadystatechange = function () {
       var req;
       if (request.readyState === 4) { // DONE
         req = $.parse(request);
-        if (request.status >= 200 && request.status < 300) {
+        if ((request.status >= 200 && request.status < 300)) {
           methods.success.apply(methods, req);
         } else {
           methods.error.apply(methods, req);
@@ -69,20 +73,20 @@ export default class Http {
     return VoodooXHR;
   }
 
-  get(src) {
-    return this.xhr("GET", src);
+  get(src, token) {
+    return this.xhr("GET", src, token);
   }
 
-  put(url, data) {
-    return this.xhr("PUT", url, data);
+  put(url, token, data) {
+    return this.xhr("PUT", url, token, data);
   }
 
-  post(url, data) {
-    return this.xhr("POST", url, data);
+  post(url, token, data) {
+    return this.xhr("POST", url, token, data);
   }
 
-  delete(url) {
-    return this.xhr("DELETE", url);
+  delete(url, token) {
+    return this.xhr("DELETE", url, token);
   }
 
   setContentType(value) {

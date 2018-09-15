@@ -330,10 +330,10 @@ export default class VNode {
     ifStatement.state = newVal;
 
     if(ifStatement.state && ifStatement.state !== null) {
-      console.log("si deve vedere", ifStatement.state);
+      // show node
       scheduler.schedule(() => { node.removeAttribute(DIRECTIVES.cloak); });
     } else {
-      console.log("si deve nascondere");
+      // hide node
       scheduler.schedule(() => { node.setAttribute(DIRECTIVES.cloak, ""); });
     }
 
@@ -344,13 +344,17 @@ export default class VNode {
   }
 
   mouseOverChange(node, varName, eventName, newVal) {
-    console.log("MOUSEOVER", node, varName, eventName, newVal);
+    //console.log("MOUSEOVER", node, varName, eventName, newVal);
     node.addEventListener("mouseover", newVal.bind(node));
   }
 
   keyUpChange(node, varName, eventName, newVal) {
-    console.log("KEYUP", node, varName, eventName, newVal);
+    //console.log("KEYUP", node, varName, eventName, newVal);
     node.addEventListener("keyup", newVal.bind(node));
+  }
+
+  inputChange(node, varName, eventName, newVal) {
+    node.addEventListener("input", newVal.bind(node));
   }
 
   render(varName, watcherName, newVal) {

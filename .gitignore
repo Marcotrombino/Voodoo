@@ -1,8 +1,4 @@
 test
 test2
-.babelrc
-.eslintrc.json
-package-lock.json
-rollup.config.js
+test3
 node_modules
-package.json

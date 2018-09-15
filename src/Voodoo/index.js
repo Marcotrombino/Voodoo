@@ -1,6 +1,8 @@
 import * as window from "window";
 import * as includes from "../Utils/includesPolyfill.js";
 import * as every from "../Utils/everyPolyfill.js";
+import * as forEach from "../Utils/forEachPolyfill.js";
+import * as nodeListForEach from "../Utils/nodeListForEachPolyfill.js";
 import { isString, isArray, isFunction } from "../Utils/types.js";
 import scheduler from "../Scheduler";
 import parser from "../Parser";
